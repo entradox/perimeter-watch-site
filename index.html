@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Perimeter Watch — passive external-perimeter monitoring for web agencies</title>
-<meta name="description" content="We watch the public metadata around your client domains — cert expiries, takeable subdomains, domain expiries, lookalike domains. Nothing touches your systems. No credentials, no access.">
+<meta name="description" content="We watch the public metadata around your client domains — cert expiries, dangling subdomain records, domain expiries, lookalike domains. Nothing touches your systems. No credentials, no access.">
 <style>
   :root {
     --bg: #0d1117;
@@ -132,9 +132,10 @@
   <div class="wrap">
     <h1>Perimeter Watch</h1>
     <p class="subhead"><span class="tagline">Passive external-perimeter monitoring for web agencies.</span>
-      We watch the public metadata around your client domains — cert expiries, takeable subdomains,
+      We watch the public metadata around your client domains — cert expiries, dangling subdomain records,
       domain expiries, lookalike domains. Nothing touches your systems. No credentials, no access.
-      We only ask for names.</p>
+      We only ask for names.
+      Checks run weekly. Immediate alerts for certain findings. Briefs are informational — see Terms.</p>
   </div>
 </header>
 
@@ -151,7 +152,7 @@
         </div>
         <div class="card">
           <h3>Dangling DNS / subdomain takeover</h3>
-          <p>Fingerprint every known subdomain for dangling records that point at claimable services — the gap an attacker parks on before you hear about it.</p>
+          <p>Fingerprint subdomains for dangling records that point at claimable services — a known hijack path for staging and legacy subdomains.</p>
           <span class="src">source: can-i-take-over-xyz fingerprints</span>
         </div>
         <div class="card">
@@ -188,6 +189,7 @@
     <div class="wrap">
       <h2>Pricing</h2>
       <p class="section-note">Flat monthly pricing. Cancel any time.</p>
+      <p class="section-note">Cancellation stops the next billing cycle. No partial-month refunds. Domain lists and briefs are deleted within 7 days of cancellation — see Terms.</p>
       <div class="pricing">
         <div class="plan">
           <div class="name">Lite</div>
@@ -197,7 +199,6 @@
             <li>All four checks on every run</li>
             <li>One-page brief with evidence</li>
           </ul>
-          <a class="btn btn-outline" href="https://buy.stripe.com/test_6oU14m4TseoEe73erZ24001" target="_blank" rel="noopener">Start Lite</a>
         </div>
         <div class="plan featured">
           <div class="name">Agency</div>
@@ -207,10 +208,9 @@
             <li>All four checks on every run</li>
             <li>One-page brief with evidence</li>
           </ul>
-          <a class="btn btn-solid" href="https://buy.stripe.com/test_7sYfZg99IgwM3sp1Fd24002" target="_blank" rel="noopener">Start Agency</a>
         </div>
       </div>
-      <p class="test-note">Checkout links are currently in Stripe test mode.</p>
+      <p class="section-note" style="margin-top: 20px;">Payments launch shortly — reply now for a free one-page perimeter snapshot.</p>
     </div>
   </section>
 
@@ -265,15 +265,21 @@ takedowns · fixes. <span class="dim">Passive public metadata only.</span></div>
   <div class="wrap">
     <h2>Terms of service</h2>
     <ul>
-      <li><strong>Authorized domains only.</strong> Written confirmation required per domain. We check domains you own or manage — nothing else.</li>
-      <li><strong>Passive public metadata only.</strong> Public records, CT logs, DNS. Nothing else.</li>
-      <li><strong>No probing.</strong> No port scans, no crawling, no active testing — on any plan, ever.</li>
-      <li><strong>No takedown services.</strong> We report findings. We don't act on them.</li>
-      <li><strong>Data retention.</strong> Domain lists and briefs are deleted within 7 days of cancellation. Evidence copies are retained for 90 days.</li>
+      <li><strong>1. The service.</strong> Perimeter Watch is an informational monitoring service. We check public metadata for the domains you register — certificate records in public Certificate Transparency logs, public DNS records, and public registrar/whois records — and deliver briefs and alerts based on what those public records showed when we checked.</li>
+      <li><strong>2. Authorized domains only.</strong> Before we check a domain, you confirm in writing that you own it or are authorized by its owner to include it. You warrant that every domain you submit meets this requirement. If an authority dispute is raised about a domain you submitted, we suspend monitoring for that domain immediately and may terminate your account.</li>
+      <li><strong>3. Passive public metadata only.</strong> Our checks read public records only. No port scans, no crawling, no active testing, no access requiring credentials. You never give us access to any system.</li>
+      <li><strong>4. No probing, no takedowns, no fixes.</strong> We detect and report. We do not probe systems, take down lookalike domains, request removals, or fix findings — requests to do so are declined. The service is not security consulting, not a penetration test, and not brand enforcement.</li>
+      <li><strong>5. No guarantee of detection — briefs are informational.</strong> Checks run on a schedule (currently weekly), not continuously. Risks can appear between runs, and public sources do not show everything. A GREEN rating, an "OK" finding, or the absence of an alert is not a representation or warranty that a domain is safe or that no risk exists. Findings reflect public records at the time of the run only. Do not rely on the service as your sole security or compliance measure.</li>
+      <li><strong>6. Alerts are best-effort.</strong> Immediate alerts are delivered by email or Discord as you select. Delivery depends on providers we do not control. Review your weekly brief regardless of alerts received.</li>
+      <li><strong>7. Data retention and privacy.</strong> We store your contact information, your domain list, and the briefs we generate. Domain lists and briefs are deleted within 7 days of cancellation. Evidence copies (raw check outputs) are retained for up to 90 days after cancellation solely for dispute resolution and quality audit, then deleted. Payments are processed by Stripe; we never see or store card details. We do not sell your data. Request deletion of your data at any time via the contact below.</li>
+      <li><strong>8. Disclaimer of warranties.</strong> The service is provided "as is" and "as available," without warranties of any kind, express or implied, including merchantability, fitness for a particular purpose, and non-infringement. We do not warrant uninterrupted or error-free operation.</li>
+      <li><strong>9. Limitation of liability.</strong> To the maximum extent permitted by law, Parmanand LLC's total liability arising out of or relating to the service is limited to the fees you paid in the 12 months before the claim. Parmanand LLC is not liable for indirect, incidental, or consequential damages — including lost revenue, lost clients, or remediation costs — even if advised of the possibility.</li>
+      <li><strong>10. Your authority warranty.</strong> You agree to cover third-party claims arising from domains you submitted without the authority warranted in Section 2.</li>
+      <!-- TODO: principal contact email — replace CONTACT@EXAMPLE.COM when principal supplies real address (review Q1) -->
+      <li><strong>11. The parties.</strong> Perimeter Watch is operated by Parmanand LLC (Georgia, USA). Abhishek Sharma is the named operator, accountable for the operation of the service. Governing law: State of Georgia. Contact for notices, deletions, and disputes: CONTACT@EXAMPLE.COM</li>
     </ul>
     <div class="colophon">
-      Perimeter Watch is run by Abhishek Sharma — a named human, accountable for every brief.
-      Contact: reply via the channel where you found this page.
+      Perimeter Watch is a trade name of Parmanand LLC.
     </div>
   </div>
 </footer>
