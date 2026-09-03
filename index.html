@@ -210,6 +210,7 @@
             <li>One-page brief with evidence</li>
           </ul>
           <a class="btn" href="https://buy.stripe.com/28E00igCaeoE0gd1Fd24007" style="margin-top:14px;">Start Lite</a>
+          <p style="font-size:0.8em;color:#999;margin-top:10px;">Your email is collected at checkout by Stripe. Weekly briefs are sent to that address. Nothing else is required.</p>
         </div>
         <div class="plan featured">
           <div class="name">Agency</div>
@@ -220,6 +221,7 @@
             <li>One-page brief with evidence</li>
           </ul>
           <a class="btn" href="https://buy.stripe.com/bJebJ00DcdkAd2Z6Zx24008" style="margin-top:14px;">Start Agency</a>
+          <p style="font-size:0.8em;color:#999;margin-top:10px;">Your email is collected at checkout by Stripe. Weekly briefs are sent to that address. Nothing else is required.</p>
         </div>
       </div>
       <p class="section-note" style="margin-top: 20px;">Payments are processed by Stripe. Cancel any time — see Terms.</p>
@@ -266,9 +268,16 @@ takedowns · fixes. <span class="dim">Passive public metadata only.</span></div>
   <section class="start">
     <div class="wrap start-box">
       <h2>How to start</h2>
-      <p class="start-line">Reply with one domain for a free one-page perimeter snapshot — entradox@icloud.com</p>
-      <span class="authority">"I own or manage this domain"</span>
-      <p class="authority-why">Include this authority confirmation line with your domain. No confirmation, no check — we don't run briefs on domains without it.</p>
+      <p class="start-line">Get a free one-page perimeter snapshot. Instant, no signup.</p>
+      <form id="pw-form" onsubmit="return false;" style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;">
+        <input id="pw-domain" type="text" placeholder="yourdomain.com" style="padding:11px 14px;border-radius:6px;border:1px solid #444;background:#1a1a1a;color:#eee;min-width:240px;">
+        <button id="pw-go" class="btn btn-solid" style="cursor:pointer;">Get free snapshot</button>
+      </form>
+      <p style="margin:10px 0 0;font-size:0.92em;">
+        <label style="cursor:pointer;"><input type="checkbox" id="pw-authority" style="margin-right:6px;">I own or manage this domain</label>
+      </p>
+      <p class="authority-why">No confirmation, no check — we don't run briefs on domains without authority. Nothing is installed, nothing is touched: public records only.</p>
+      <div id="pw-result" style="display:none;margin-top:18px;text-align:left;"></div>
     </div>
   </section>
 </main>
@@ -302,6 +311,55 @@ takedowns · fixes. <span class="dim">Passive public metadata only.</span></div>
     </div>
   </div>
 </footer>
+
+<script>
+(function () {
+  // Deploy note: set to the Railway prod URL after deploy; for local testing override to http://127.0.0.1:8756
+  var API_BASE = "https://perimeter-watch-api.up.railway.app";
+  var form = document.getElementById('pw-form');
+  var input = document.getElementById('pw-domain');
+  var checkbox = document.getElementById('pw-authority');
+  var btn = document.getElementById('pw-go');
+  var out = document.getElementById('pw-result');
+  function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  btn.addEventListener('click', function () {
+    var domain = (input.value || '').trim().toLowerCase().replace(/^https?:\/\//, '').split('/')[0];
+    out.style.display = 'block';
+    if (!/^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/.test(domain)) {
+      out.innerHTML = '<p style="color:var(--amber,#e6b450);">That doesn\'t look like a domain name.</p>';
+      return;
+    }
+    if (!checkbox.checked) {
+      out.innerHTML = '<p style="color:var(--amber,#e6b450);">Please confirm the authority checkbox first.</p>';
+      return;
+    }
+    btn.disabled = true;
+    var original = btn.textContent;
+    btn.textContent = 'Scanning… takes up to a minute';
+    out.innerHTML = '<p style="color:#999;">Scanning ' + esc(domain) + ' — takes up to a minute.</p>';
+    fetch(API_BASE + '/snapshot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain: domain, authority: true })
+    }).then(function (r) { return r.json().then(function (j) { return { code: r.status, j: j }; }); })
+      .then(function (res) {
+        btn.disabled = false; btn.textContent = original;
+        if (res.code === 200) {
+          var color = res.j.rating === 'GREEN' ? 'var(--green,#6fd08c)' : res.j.rating === 'AMBER' ? 'var(--amber,#e6b450)' : 'var(--red,#e5735c)';
+          out.innerHTML = '<p style="font-size:1.2em;">Rating: <strong style="color:' + color + ';">' + res.j.rating + '</strong></p>' +
+            '<pre class="brief" style="white-space:pre-wrap;background:#141414;border:1px solid #333;border-radius:8px;padding:14px;font-size:0.85em;line-height:1.5;">' + esc(res.j.brief) + '</pre>' +
+            '<p style="color:#bbb;">' + esc(res.j.note) + '</p>';
+        } else {
+          out.innerHTML = '<p style="color:var(--amber,#e6b450);">' + esc(res.j.detail || 'Something went wrong — try again in a bit.') + '</p>';
+        }
+      })
+      .catch(function () {
+        btn.disabled = false; btn.textContent = original;
+        out.innerHTML = '<p style="color:var(--amber,#e6b450);">Scan service unreachable right now — try again shortly.</p>';
+      });
+  });
+})();
+</script>
 
 </body>
 </html>
