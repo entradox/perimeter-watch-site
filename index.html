@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Perimeter Watch — passive external-perimeter monitoring for web agencies</title>
+<meta name="description" content="We watch the public metadata around your client domains — cert expiries, takeable subdomains, domain expiries, lookalike domains. Nothing touches your systems. No credentials, no access.">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --amber: #d29922;
+    --red: #f85149;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+  header { border-top: 3px solid var(--accent); padding: 72px 0 56px; }
+  h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 20px; }
+  .subhead { color: var(--muted); font-size: 1.1rem; max-width: 640px; }
+  .tagline { color: var(--text); font-weight: 600; margin-bottom: 12px; font-size: 1.05rem; }
+  section { padding: 44px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 1.35rem; font-weight: 650; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .section-note { color: var(--muted); margin-bottom: 28px; max-width: 640px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .card h3 { font-size: 1rem; font-weight: 650; margin-bottom: 8px; }
+  .card p { color: var(--muted); font-size: 0.95rem; }
+  .card .src { display: block; margin-top: 10px; font-size: 0.8rem; color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .not-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+  @media (max-width: 640px) { .not-list { grid-template-columns: 1fr; } }
+  .not-list li { color: var(--text); font-size: 0.98rem; padding-left: 22px; position: relative; }
+  .not-list li::before { content: "×"; position: absolute; left: 0; color: var(--red); font-weight: 700; }
+  .passive-line { margin-top: 20px; color: var(--muted); font-size: 0.95rem; }
+  .passive-line strong { color: var(--text); }
+  .pricing { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .pricing { grid-template-columns: 1fr; } }
+  .plan {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  .plan.featured { border-color: var(--accent); }
+  .plan .name { font-weight: 700; font-size: 1.05rem; }
+  .plan .price { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin: 8px 0 2px; }
+  .plan .price span { font-size: 0.95rem; font-weight: 400; color: var(--muted); }
+  .plan .domains { color: var(--accent); font-size: 0.9rem; margin-bottom: 14px; }
+  .plan ul { list-style: none; padding: 0; margin: 0 0 22px; flex: 1; }
+  .plan li { color: var(--muted); font-size: 0.93rem; padding: 4px 0; padding-left: 20px; position: relative; }
+  .plan li::before { content: "—"; position: absolute; left: 0; color: var(--border); }
+  .btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 6px;
+    padding: 11px 16px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 1px solid var(--accent);
+  }
+  .btn-solid { background: var(--accent); color: #0d1117; }
+  .btn-outline { background: transparent; color: var(--accent); }
+  .btn:hover { filter: brightness(1.1); }
+  .test-note { color: var(--muted); font-size: 0.8rem; margin-top: 14px; }
+  .brief {
+    background: #010409;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    white-space: pre;
+    color: var(--text);
+  }
+  .brief .g { color: var(--green); font-weight: 700; }
+  .brief .a { color: var(--amber); font-weight: 700; }
+  .brief .r { color: var(--red); font-weight: 700; }
+  .brief .dim { color: var(--muted); }
+  .brief .lbl { color: var(--accent); }
+  .legend { display: flex; gap: 24px; margin-bottom: 20px; font-size: 0.88rem; color: var(--muted); flex-wrap: wrap; }
+  .legend .g { color: var(--green); }
+  .legend .a { color: var(--amber); }
+  .legend .r { color: var(--red); }
+  .start { background: var(--surface); }
+  .start-box { text-align: center; padding: 12px 0; }
+  .start-line { font-size: 1.25rem; font-weight: 650; max-width: 560px; margin: 0 auto 16px; }
+  .authority {
+    display: inline-block;
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .authority-why { color: var(--muted); font-size: 0.88rem; margin-top: 12px; }
+  footer { border-top: 1px solid var(--border); padding: 44px 0 64px; }
+  footer h2 { font-size: 1rem; margin-bottom: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  footer ul { list-style: none; padding: 0; margin: 0 0 28px; }
+  footer li { color: var(--muted); font-size: 0.88rem; padding: 5px 0; padding-left: 18px; position: relative; }
+  footer li::before { content: "·"; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
+  footer li strong { color: var(--text); font-weight: 600; }
+  .colophon { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Perimeter Watch</h1>
+    <p class="subhead"><span class="tagline">Passive external-perimeter monitoring for web agencies.</span>
+      We watch the public metadata around your client domains — cert expiries, takeable subdomains,
+      domain expiries, lookalike domains. Nothing touches your systems. No credentials, no access.
+      We only ask for names.</p>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2>The four checks</h2>
+      <p class="section-note">Every run covers the same four checks on every domain you register. Each run produces a one-page brief with evidence.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>TLS certificate expiry</h3>
+          <p>Alert when a tracked domain's certificate enters a &lt;14-day expiry window — before a client's site shows an interstitial warning page.</p>
+          <span class="src">source: Certificate Transparency logs</span>
+        </div>
+        <div class="card">
+          <h3>Dangling DNS / subdomain takeover</h3>
+          <p>Fingerprint every known subdomain for dangling records that point at claimable services — the gap an attacker parks on before you hear about it.</p>
+          <span class="src">source: can-i-take-over-xyz fingerprints</span>
+        </div>
+        <div class="card">
+          <h3>Domain lifecycle</h3>
+          <p>Registrar expiry monitoring: alert when a client domain enters a &lt;21-day renewal window — the failure nobody notices until the site is gone.</p>
+          <span class="src">source: public registrar records</span>
+        </div>
+        <div class="card">
+          <h3>Lookalike domains</h3>
+          <p>Watch Certificate Transparency logs for typo and hyphen variants of your domains, flagged only when the variant has live DNS.</p>
+          <span class="src">source: CT logs · DNS resolution</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>What this is not</h2>
+      <p class="section-note">Stated plainly, so nobody is surprised:</p>
+      <ul class="not-list">
+        <li>No port scans</li>
+        <li>No crawling</li>
+        <li>No active testing</li>
+        <li>No takedowns</li>
+        <li>No fixes</li>
+        <li>Not a pentest</li>
+      </ul>
+      <p class="passive-line"><strong>Passive public metadata only.</strong> We read what is already public. If it requires touching your systems, we don't do it.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Pricing</h2>
+      <p class="section-note">Flat monthly pricing. Cancel any time.</p>
+      <div class="pricing">
+        <div class="plan">
+          <div class="name">Lite</div>
+          <div class="price">$9<span>/mo</span></div>
+          <div class="domains">3 domains</div>
+          <ul>
+            <li>All four checks on every run</li>
+            <li>One-page brief with evidence</li>
+          </ul>
+          <a class="btn btn-outline" href="https://buy.stripe.com/test_6oU14m4TseoEe73erZ24001" target="_blank" rel="noopener">Start Lite</a>
+        </div>
+        <div class="plan featured">
+          <div class="name">Agency</div>
+          <div class="price">$19<span>/mo</span></div>
+          <div class="domains">10 domains</div>
+          <ul>
+            <li>All four checks on every run</li>
+            <li>One-page brief with evidence</li>
+          </ul>
+          <a class="btn btn-solid" href="https://buy.stripe.com/test_7sYfZg99IgwM3sp1Fd24002" target="_blank" rel="noopener">Start Agency</a>
+        </div>
+      </div>
+      <p class="test-note">Checkout links are currently in Stripe test mode.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Sample brief</h2>
+      <p class="section-note">This is the actual brief format you receive — generated 2026-09-03 for a real domain, shown unedited.</p>
+      <div class="legend">
+        <span><span class="g">● GREEN</span> — all clear</span>
+        <span><span class="a">● AMBER</span> — attention needed</span>
+        <span><span class="r">● RED</span> — act now</span>
+      </div>
+      <div class="brief"><span class="lbl">PERIMETER WATCH — BRIEF</span>
+<span class="dim">──────────────────────────────────────────────────</span>
+<span class="lbl">DOMAIN:</span>  gasstationpermit.com
+<span class="lbl">RUN:</span>     2026-09-03
+<span class="lbl">RATING:</span>  <span class="g">● GREEN</span> — all checks OK
+
+<span class="lbl">COVERAGE:</span> tls · domain_lifecycle · dangling_dns · lookalikes
+
+<span class="g">● tls</span> — OK
+  <span class="dim">Evidence:</span> Certificate Transparency log (crt.sh)
+  Certificate expires 2026-11-29 · 87 days remaining
+  <span class="dim">Issuer:</span> Let's Encrypt
+
+<span class="g">● domain_lifecycle</span> — OK
+  Registrar expiry 2027-06-18 · 287 days remaining
+
+<span class="g">● dangling_dns</span> — OK
+  50 subdomains checked · none dangling
+
+<span class="g">● lookalikes</span> — OK
+  4 variants queried · none registered
+
+<span class="dim">──────────────────────────────────────────────────</span>
+<span class="lbl">NOT IN SCOPE:</span> port scans · crawling · active testing ·
+takedowns · fixes. <span class="dim">Passive public metadata only.</span></div>
+    </div>
+  </section>
+
+  <section class="start">
+    <div class="wrap start-box">
+      <h2>How to start</h2>
+      <p class="start-line">Reply with one domain for a free one-page perimeter snapshot.</p>
+      <span class="authority">"I own or manage this domain"</span>
+      <p class="authority-why">Include this authority confirmation line with your domain. No confirmation, no check — we don't run briefs on domains without it.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h2>Terms of service</h2>
+    <ul>
+      <li><strong>Authorized domains only.</strong> Written confirmation required per domain. We check domains you own or manage — nothing else.</li>
+      <li><strong>Passive public metadata only.</strong> Public records, CT logs, DNS. Nothing else.</li>
+      <li><strong>No probing.</strong> No port scans, no crawling, no active testing — on any plan, ever.</li>
+      <li><strong>No takedown services.</strong> We report findings. We don't act on them.</li>
+      <li><strong>Data retention.</strong> Domain lists and briefs are deleted within 7 days of cancellation. Evidence copies are retained for 90 days.</li>
+    </ul>
+    <div class="colophon">
+      Perimeter Watch is run by Abhishek Sharma — a named human, accountable for every brief.
+      Contact: reply via the channel where you found this page.
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
