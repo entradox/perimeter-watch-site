@@ -361,5 +361,9 @@ takedowns · fixes. <span class="dim">Passive public metadata only.</span></div>
 })();
 </script>
 
+  <script>
+    // page-view beacon (no cookies, no third party — hits our own API)
+    new Image().src = API_BASE + "/pixel.gif?r=" + encodeURIComponent(document.referrer);
+  </script>
 </body>
 </html>
